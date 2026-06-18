@@ -1,0 +1,164 @@
+{
+	"version": 0,
+	"game": "The Murder of Sonic the Hedgehog",
+	"items": [
+		{"name": "Shelf Crack", "itemtype": "progression", "inventory": "crackonshelf"},
+		{"name": "Stick", "itemtype": "progression", "inventory": "stick"},
+		{"name": "Used Cups", "itemtype": "progression", "inventory": "usedcups"},
+		{"name": "Smashed Arcade", "itemtype": "progression", "inventory": "smashedarcade"},
+		{"name": "Mirage Express Manual", "itemtype": "progression", "inventory": "mirageexpressmanual"},
+		{"name": "Shadow's Lock", "itemtype": "progression", "inventory": "shadowslock"},
+		{"name": "Library Map", "itemtype": "progression", "inventory": "librarymap"},
+		{"name": "Vector's Ticket", "itemtype": "progression", "inventory": "vectorticket"},
+		{"name": "Crumpled Paper", "itemtype": "progression", "inventory": "crumpledpaper"},
+		{"name": "Hidden Passage", "itemtype": "progression", "inventory": "hiddenpassage"},
+		{"name": "Keyring", "itemtype": "progression", "inventory": "keyring"},
+		{"name": "Blowdart", "itemtype": "progression", "inventory": "blowdart"},
+		{"name": "Blueprints", "itemtype": "progression", "inventory": "blueprints"},
+		{"name": "Broken Robot Arm", "itemtype": "progression", "inventory": "brokenrobotarm"},
+		{"name": "Amy's Hammer", "itemtype": "progression", "inventory": "amyshammer"},
+		{"name": "Menu", "itemtype": "progression", "inventory": "menu"},
+		{"name": "Chili Dog", "itemtype": "filler", "inventory": ""},
+		{"name": "Ramen", "itemtype": "filler", "inventory": ""},
+		{"name": "Chicken Cordon Bleu", "itemtype": "filler", "inventory": ""}
+	],
+	"rooms": [
+		{"name": "Dining Car", "type": "car", "env": "Environments/Prologue", "entrances": {"Menu": []}, "checks": [
+			{"name": "Screen", "sanity": "scr", "object": "Screen"},
+			{"name": "Napkin Holder", "sanity": "obj", "object": "Napkin Holder"},
+			{"name": "Robot Arm", "sanity": "obj", "object": "Robot Arm"},
+			{"name": "Sonic", "sanity": "obj", "object": "Sonic"},
+			{"name": "Tails", "sanity": "obj", "object": "Tails"},
+			{"name": "Knuckles", "sanity": "obj", "object": "Knuckles"},
+			{"name": "Amy", "sanity": "obj", "object": "Amy"},
+			{"name": "Espio", "sanity": "obj", "object": "Espio"},
+			{"name": "Vector", "sanity": "obj", "object": "Vector"},
+			{"name": "Shadow", "sanity": "obj", "object": "Shadow"},
+			{"name": "Rouge", "sanity": "obj", "object": "Rouge"},
+			{"name": "Blaze", "sanity": "obj", "object": "Blaze"}
+		]},
+		{"name": "Dining Closet", "type": "car", "env": "Environments/DiningCloset", "entrances": {"Dining Car": ["Vector's Ticket"]}, "checks": [
+			{"name": "Crack on Shelf", "sanity": "obj", "object": "Crack on Shelf"},
+			{"name": "Wet Floor Sign", "sanity": "obj", "object": "Wet Floor Sign"},
+			{"name": "Trash Bin", "sanity": "obj", "object": "Trash Bin"},
+			{"name": "Food Boxes", "sanity": "obj", "object": "Food Boxes"},
+			{"name": "Stick", "sanity": "obj", "object": "Stick"},
+			{"name": "Amy", "sanity": "obj", "object": "Amy"}
+		]},
+		{"name": "Dining Closet Interrogation", "type": "sub", "env": "Environments/DiningCloset", "entrances": {"Dining Closet": ["Shelf Crack", "Stick"]}, "checks": [
+			{"name": "Runner #1", "sanity": "run", "index": 5},
+			{"name": "Runner #2", "sanity": "run", "index": 6}
+		]},
+		{"name": "Saloon", "type": "car", "env": "Environments/Saloon", "entrances": {"Dining Closet Interrogation": []}, "checks": [
+			{"name": "Wanted Poster", "sanity": "obj", "object": "Wanted Poster"},
+			{"name": "Window", "sanity": "obj", "object": "Window"},
+			{"name": "Robotic Arm", "sanity": "obj", "object": "Robotic Arm"},
+			{"name": "Used Cups", "sanity": "obj", "object": "Used Cups"},
+			{"name": "Smashed Arcade", "sanity": "obj", "object": "Smashed Arcade"},
+			{"name": "Exit Door", "sanity": "obj", "object": "Exit Door"},
+			{"name": "Bowl of Nuts", "sanity": "obj", "object": "Bowl of Nuts"},
+			{"name": "Trash Bin", "sanity": "obj", "object": "Trash Bin"},
+			{"name": "Knuckles", "sanity": "obj", "object": "Knuckles"},
+			{"name": "Screen", "sanity": "scr", "object": "Screen"}
+		]},
+		{"name": "Saloon Interrogation", "type": "sub", "env": "Environments/Saloon", "entrances": {"Saloon": ["Used Cups", "Smashed Arcade"]}, "checks": [
+			{"name": "Runner #1", "sanity": "run", "index": 4},
+			{"name": "Runner #2", "sanity": "run", "index": 9},
+			{"name": "Runner #3", "sanity": "run", "index": 7},
+			{"name": "Fixed Arcade", "sanity": "obj", "object": "Fixed Arcade"}
+		]},
+		{"name": "Library", "type": "car", "env": "Environments/Library", "entrances": {"Saloon Interrogation": []}, "checks": [
+			{"name": "Scattered Books", "sanity": "obj", "object": "Scattered Books"},
+			{"name": "Library Brochure", "sanity": "obj", "object": "Library Brochure"},
+			{"name": "Motivational Poster", "sanity": "obj", "object": "MotivationalPoster"},
+			{"name": "Robotic Arm", "sanity": "obj", "object": "Robotic Arm"},
+			{"name": "Exit Door", "sanity": "obj", "object": "Exit Door"},
+			{"name": "Globe", "sanity": "obj", "object": "Globe"},
+			{"name": "Eggman Book", "sanity": "obj", "object": "Eggman Book"},
+			{"name": "Bookshelf", "sanity": "obj", "object": "Bookshelf"},
+			{"name": "Trash Bin", "sanity": "obj", "object": "Trash Bin"},
+			{"name": "Vector", "sanity": "obj", "object": "Vector"},
+			{"name": "Espio", "sanity": "obj", "object": "Espio"},
+			{"name": "Screen", "sanity": "scr", "object": "Screen"}
+		]},
+		{"name": "Library Interrogation", "type": "sub", "env": "Environments/Library", "entrances": {"Library": ["Mirage Express Manual", "Shadow's Lock", "Library Map"]}, "checks": [
+			{"name": "Runner #1", "sanity": "run", "index": 10},
+			{"name": "Runner #2", "sanity": "run", "index": 11},
+			{"name": "Runner #3", "sanity": "run", "index": 12}
+		]},
+		{"name": "Casino", "type": "car", "env": "Environments/Casino", "entrances": {"Library Interrogation": []}, "checks": [
+			{"name": "Robotic Arm", "sanity": "obj", "object": "Robotic Arm"},
+			{"name": "Poker Table", "sanity": "obj", "object": "Poker Table"},
+			{"name": "Poker Chips", "sanity": "obj", "object": "Poker Chips"},
+			{"name": "Slot Machines", "sanity": "obj", "object": "Slot Machines"},
+			{"name": "Trash Bin", "sanity": "obj", "object": "Trash Bin"},
+			{"name": "Exit Door", "sanity": "obj", "object": "Exit"},
+			{"name": "Blaze", "sanity": "obj", "object": "Blaze"},
+			{"name": "Rouge", "sanity": "obj", "object": "Rouge"},
+			{"name": "Screen", "sanity": "scr", "object": "Screen"}
+		]},
+		{"name": "Safe Room", "type": "sub", "env": "Environments/SafeRoom", "entrances": {"Casino": []}, "checks": [
+			{"name": "Wall of Safes", "sanity": "obj", "object": "Wall of Safes"},
+			{"name": "Giant Safe", "sanity": "obj", "object": "Giant Safe"}
+		]},
+		{"name": "Lounge", "type": "car", "env": "Environments/Lounge", "entrances": {"Casino": []}, "checks": [
+			{"name": "Keyring", "sanity": "obj", "object": "Keyring"},
+			{"name": "Printer", "sanity": "obj", "object": "Printer"},
+			{"name": "Computer", "sanity": "obj", "object": "Computer"},
+			{"name": "Window", "sanity": "obj", "object": "Window"},
+			{"name": "Big Band", "sanity": "obj", "object": "Big Band"},
+			{"name": "Robotic Arm", "sanity": "obj", "object": "Robotic Arm"},
+			{"name": "Trash Bin", "sanity": "obj", "object": "Trash Bin"},
+			{"name": "Amy", "sanity": "obj", "object": "Amy"},
+			{"name": "Shadow", "sanity": "obj", "object": "Shadow"},
+			{"name": "Exit Door", "sanity": "obj", "object": "Exit Door"},
+			{"name": "Closed Wardrobe", "sanity": "obj", "object": "Closed Wardrobe"},
+			{"name": "Wardrobe String", "sanity": "obj", "object": "Wardrobe String"},
+			{"name": "Screen", "sanity": "scr", "object": "Screen"}
+		]},
+		{"name": "Lounge Interrogation", "type": "sub", "env": "Environments/Lounge", "entrances": {"Lounge": ["Keyring", "Crumpled Paper", "Hidden Passage"]}, "checks": [
+			{"name": "Runner #1", "sanity": "run", "index": 13},
+			{"name": "Runner #2", "sanity": "run", "index": 15},
+			{"name": "Runner #3", "sanity": "run", "index": 14}
+		]},
+		{"name": "Conductor's Car", "type": "car", "env": "Environments/Conductor_Car", "entrances": {"Lounge Interrogation": []}, "checks": [
+			{"name": "Vent", "sanity": "obj", "object": "Vent"},
+			{"name": "Speakers", "sanity": "obj", "object": "Speakers"},
+			{"name": "TV Screen", "sanity": "obj", "object": "TV Screen"},
+			{"name": "Mug", "sanity": "obj", "object": "Mug"},
+			{"name": "Controls", "sanity": "obj", "object": "Train Deck"},
+			{"name": "ConductorPhoto", "sanity": "obj", "object": "Conductor Photo"},
+			{"name": "Blowdart", "sanity": "obj", "object": "Blowdart"},
+			{"name": "Broken Robot Arm", "sanity": "obj", "object": "Broken Robot Arm"},
+			{"name": "Shadow", "sanity": "obj", "object": "Shadow"},
+			{"name": "Amy", "sanity": "obj", "object": "Amy"}
+		]},
+		{"name": "Conductor's Car Interrogation", "type": "sub", "env": "Environments/Conductor_Car", "entrances": {"Conductor's Car": ["Blowdart", "Broken Robot Arm", "Blueprints"]}, "checks": [
+			{"name": "Runner #1", "sanity": "run", "index": 32},
+			{"name": "Runner #2", "sanity": "run", "index": 28},
+			{"name": "Runner #3", "sanity": "run", "index": 33}
+		]},
+		{"name": "Lockdown", "type": "car", "env": "Environments/LockdownDiningCar", "entrances": {"Conductor's Car Interrogation": []}, "checks": [
+			{"name": "Window", "sanity": "obj", "object": "Window"},
+			{"name": "Napkin Holder", "sanity": "obj", "object": "Napkin Holder"},
+			{"name": "Robot Arm", "sanity": "obj", "object": "Robot Arm"},
+			{"name": "Broken Dish", "sanity": "obj", "object": "Broken Dish"},
+			{"name": "Screens", "sanity": "obj", "object": "Screens"},
+			{"name": "Lockdown Door", "sanity": "obj", "object": "Lockdown Door"},
+			{"name": "Sonic", "sanity": "obj", "object": "Sonic"}
+		]},
+		{"name": "Final Push", "type": "car", "env": "Environments/Final_Push", "entrances": {"Lockdown": []}, "checks": [
+			{"name": "Runner #1", "sanity": "run", "index": 18},
+			{"name": "Runner #2", "sanity": "run", "index": 20},
+			{"name": "Runner #3", "sanity": "run", "index": 29},
+			{"name": "Runner #4", "sanity": "run", "index": 21},
+			{"name": "Runner #5", "sanity": "run", "index": 22},
+			{"name": "Runner #6", "sanity": "run", "index": 23},
+			{"name": "Runner #7", "sanity": "run", "index": 25},
+			{"name": "Runner #8", "sanity": "run", "index": 26},
+			{"name": "Runner #9", "sanity": "run", "index": 27},
+			{"name": "Runner #10", "sanity": "run", "index": 30},
+			{"name": "Runner #11", "sanity": "run", "index": 31}
+		]}
+	]
+}
