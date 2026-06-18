@@ -50,7 +50,7 @@ namespace tmosthap {
 		}
 
 		public static void sendLocation(string sanity, int index) {
-			string env = GameObject.Find("Canvas/EnvironmentFrame").GetComponent<EnvironmentView>().GetEnvironmentKey();
+			string env = ModMain.getEnvironment();
 			foreach (APRoom room in APShared.rooms) {
 				if (room.env == env) {
 					foreach (APRoomCheck check in room.checks) {

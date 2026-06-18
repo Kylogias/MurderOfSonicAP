@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using MelonLoader;
 using HarmonyLib;
 using Archipelago.MultiClient.Net;
@@ -17,11 +18,18 @@ using Newtonsoft.Json.Linq;
 
 namespace tmosthap {
 	class ModMain : MelonMod {
+		public enum QOLOption {
+			Off = 0,
+			On = 1,
+			AfterFirstComplete = 2
+		}
+		
 		static MelonPreferences_Entry<string> ip;
 		static MelonPreferences_Entry<int> port;
 		static MelonPreferences_Entry<string> slot;
 		static MelonPreferences_Entry<string> password;
 		static MelonPreferences_Entry<bool> deathlinkEnabled;
+		static MelonPreferences_Entry<QOLOption> autoskip;
 		
 		public static ArchipelagoSession currentSession;
 		public static DeathLinkService deathLink;
@@ -40,6 +48,7 @@ namespace tmosthap {
 			slot = MelonPreferences.CreateEntry<string>("Archipelago", "Slot", "Player1");
 			password = MelonPreferences.CreateEntry<string>("Archipelago", "Password", "");
 			deathlinkEnabled = MelonPreferences.CreateEntry<bool>("Archipelago", "Deathlink Enabled", false);
+			autoskip = MelonPreferences.CreateEntry<QOLOption>("Archipelago", "Autoskip Dialog", QOLOption.Off);
 			
 			new SlotData();
 			messages = new Queue<string>();
@@ -69,28 +78,71 @@ namespace tmosthap {
 			}
 		}
 		
+		public static string getEnvironment() {
+			GameObject go = GameObject.Find("Canvas/EnvironmentFrame");
+			if (!go) return "";
+			return go.GetComponent<EnvironmentView>().GetEnvironmentKey();
+		}
+		
 		[HarmonyPatch(typeof(EnvironmentView), "OnMoveToEnvironment")]
 		private class EnvironmentPatch {
 			private static bool Prefix(Dictionary<string, object> message) {
 				if (currentSession == null) return false;
+				if (!envButton) {
+					string fromEnv = getEnvironment();
+					JArray complete_envs = (JArray)currentSession.DataStorage["complete_envs"];
+					bool completeEnv = false;
+					foreach (string env in complete_envs) {
+						if (env == fromEnv) completeEnv = true;
+					}
+					if (!completeEnv) currentSession.DataStorage["complete_envs"] += new[]{fromEnv};
+				}
 				if (SlotData.carRando && !envButton) return false;
 				envButton = false;
-				JArray envs = (JArray)currentSession.DataStorage["seen_envs"];
-				MelonLogger.Msg("{0}", envs);
-				bool hasString = false;
-				foreach (string env in envs) {
-					if (env == (string)message["DestinationKey"]) hasString = true;
+				JArray seen_envs = (JArray)currentSession.DataStorage["seen_envs"];
+				MelonLogger.Msg("{0}", seen_envs);
+				bool seenEnv = false;
+				foreach (string env in seen_envs) {
+					if (env == (string)message["DestinationKey"]) seenEnv = true;
 				}
 				
-				if (!hasString) {
+				if (!seenEnv) {
 					currentSession.DataStorage["seen_envs"] += new []{(string)message["DestinationKey"]};
 				}
 				return true;
 			}
 		}
 		
+		public static bool isQOLEnabled(QOLOption qol) {
+			switch (qol) {
+				case QOLOption.Off: return false;
+				case QOLOption.On: return true;
+				case QOLOption.AfterFirstComplete:
+					if (currentSession == null) return false;
+					string curEnv = getEnvironment();
+					JArray envs = (JArray)currentSession.DataStorage["complete_envs"];
+					bool hasString = false;
+					foreach (string env in envs) {
+						if (env == curEnv) hasString = true;
+					}
+					return hasString;
+			}
+			return false;
+		}
+
+		static float throttle;
 		public override void OnUpdate() {
 			if (currentSession == null) return;
+			throttle -= Time.deltaTime;
+			if (throttle < 0) {
+				throttle = 0;
+				if (isQOLEnabled(autoskip.Value)) {
+					DialogView dv = DialogView.Instance;
+					if (dv.gameObject.activeSelf && StoryManager.Instance.story.currentChoices.Count == 0) {
+						dv.GetType().GetMethod("OnClickContinue", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(dv, new object[]{});
+					}
+				}
+			}
 			if (Input.GetKeyDown(KeyCode.BackQuote)) {
 				Transform rooms = GameObject.Find("Canvas/DebugMapScreen/WindowRoot").transform;
 				JArray envs = (JArray)currentSession.DataStorage["seen_envs"];
@@ -175,6 +227,7 @@ namespace tmosthap {
 				while (currentSession.Items.Any()) currentSession.Items.DequeueItem();
 
 				currentSession.DataStorage["seen_envs"].Initialize(new JArray());
+				currentSession.DataStorage["complete_envs"].Initialize(new JArray());
 			} else {
 				MelonLogger.Error("Error while connecting to Archipelago");
 				messages.Enqueue("Error while connecting to Archipelago");

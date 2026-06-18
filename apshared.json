@@ -121,8 +121,8 @@
 			{"name": "Amy", "sanity": "obj", "object": "Amy"},
 			{"name": "Shadow", "sanity": "obj", "object": "Shadow"},
 			{"name": "Exit Door", "sanity": "obj", "object": "Exit Door"},
-			{"name": "Closed Wardrobe", "sanity": "obj", "object": "Closed Wardrobe"},
-			{"name": "Wardrobe String", "sanity": "obj", "object": "Wardrobe String"},
+			{"name": "Closed Wardrobe", "sanity": "obj", "object": "WardrobeClosed"},
+			{"name": "Wardrobe String", "sanity": "obj", "object": "String"},
 			{"name": "Screen", "sanity": "scr", "object": "Screen"}
 		]},
 		{"name": "Lounge Interrogation", "type": "sub", "env": "Environments/Lounge", "entrances": {"Lounge": ["Keyring", "Crumpled Paper", "Hidden Passage"]}, "checks": [
@@ -136,7 +136,7 @@
 			{"name": "TV Screen", "sanity": "obj", "object": "TV Screen"},
 			{"name": "Mug", "sanity": "obj", "object": "Mug"},
 			{"name": "Controls", "sanity": "obj", "object": "Train Deck"},
-			{"name": "ConductorPhoto", "sanity": "obj", "object": "Conductor Photo"},
+			{"name": "Conductor Photo", "sanity": "obj", "object": "ConductorPhoto"},
 			{"name": "Blowdart", "sanity": "obj", "object": "Blowdart"},
 			{"name": "Broken Robot Arm", "sanity": "obj", "object": "Broken Robot Arm"},
 			{"name": "Shadow", "sanity": "obj", "object": "Shadow"},
