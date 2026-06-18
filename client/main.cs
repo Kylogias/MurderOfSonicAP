@@ -213,7 +213,8 @@ namespace tmosthap {
 			
 			if (isQOLEnabled(autoskip.Value)) {
 				DialogView dv = DialogView.Instance;
-				if (dv.gameObject.activeSelf && StoryManager.Instance.story.currentChoices.Count == 0) {
+				Button btn = (Button)dv.GetType().GetField("fullscreenSkipButton", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(dv);
+				if (dv.gameObject.activeSelf && btn.interactable && StoryManager.Instance.story.canContinue) {
 					dv.GetType().GetMethod("OnClickContinue", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(dv, new object[]{});
 				}
 			}
