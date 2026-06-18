@@ -103,8 +103,28 @@ namespace tmosthap {
 				textRect.localPosition = new Vector3(0, -((Screen.height/2)-(Screen.height/16)), 0);
 				textRect.sizeDelta = new Vector2(Screen.width, Screen.height/8);
 			}
-		}
 
+			RectTransform invXfrm = InventoryScreen.Instance.gameObject.GetComponent<RectTransform>();
+			RectTransform invWndXfrm = (RectTransform)invXfrm.Find("WindowRoot");
+			invWndXfrm.sizeDelta = invWndXfrm.sizeDelta * new Vector2(1.6f, 1);
+			RectTransform invLayout = (RectTransform)invWndXfrm.Find("InventoryLayout");
+			float oldX = invLayout.rect.x;
+			invLayout.sizeDelta = invLayout.sizeDelta * new Vector2(2, 1);
+			invLayout.anchoredPosition = invLayout.anchoredPosition * new Vector2(1.5f, 1);
+			RectTransform itemDetails = (RectTransform)invWndXfrm.Find("ItemDetails");
+			itemDetails.anchoredPosition = itemDetails.anchoredPosition * new Vector2(1.5f, 1);
+		}
+		
+		[HarmonyPatch(typeof(InventoryScreen), "Open")]
+		private class InventoryScreenPatch {
+			private static void Postfix(InventoryScreen __instance, List<InventoryItemThumbnailView> ___currentItems) {
+				for (int i = ___currentItems.Count; i < 16; i++) {
+					MethodInfo mi = __instance.GetType().GetMethod("CreateThumbnail", BindingFlags.NonPublic | BindingFlags.Instance);
+					___currentItems.Add((InventoryItemThumbnailView)mi.Invoke(__instance, new object[]{""}));
+				}
+			}
+		}
+		
 		static bool envButton = false;
 		[HarmonyPatch(typeof(ChangeEnvironmentButton), "OnClick")]
 		private class EnvButtonPatch {
