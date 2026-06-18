@@ -1,4 +1,15 @@
 namespace tmosthap {
+	class APItem {
+		public long id;
+		public string inventory;
+		public string env;
+		public APItem(long i, string inv, string e) {
+			id = i;
+			inventory = inv;
+			env = e;
+		}
+	}
+	
 	class APRoomCheck {
 		public string sanity;
 		public string obj;

@@ -8,7 +8,9 @@ using Archipelago.MultiClient.Net.MessageLog.Messages;
 using Archipelago.MultiClient.Net.Helpers;
 using Archipelago.MultiClient.Net.Models;
 using System.Collections.Generic;
+using System.Reflection;
 using Ink.Runtime;
+using Newtonsoft.Json.Linq;
 
 [assembly: MelonInfo(typeof(tmosthap.ModMain), "TMOSTH-AP", "0.1.0", "Kylogias")]
 [assembly: MelonGame("Sonic Social", "The Murder of Sonic The Hedgehog")]
@@ -58,6 +60,63 @@ namespace tmosthap {
 			inventoryListener.transform.SetParent(ap.transform);
 			inventoryListener.SetActive(false);
 		}
+
+		static bool envButton = false;
+		[HarmonyPatch(typeof(ChangeEnvironmentButton), "OnClick")]
+		private class EnvButtonPatch {
+			private static void Prefix() {
+				envButton = true;
+			}
+		}
+		
+		[HarmonyPatch(typeof(EnvironmentView), "OnMoveToEnvironment")]
+		private class EnvironmentPatch {
+			private static bool Prefix(Dictionary<string, object> message) {
+				if (currentSession == null) return false;
+				if (SlotData.carRando && !envButton) return false;
+				envButton = false;
+				JArray envs = (JArray)currentSession.DataStorage["seen_envs"];
+				MelonLogger.Msg("{0}", envs);
+				bool hasString = false;
+				foreach (string env in envs) {
+					if (env == (string)message["DestinationKey"]) hasString = true;
+				}
+				
+				if (!hasString) {
+					currentSession.DataStorage["seen_envs"] += new []{(string)message["DestinationKey"]};
+				}
+				return true;
+			}
+		}
+		
+		public override void OnUpdate() {
+			if (currentSession == null) return;
+			if (Input.GetKeyDown(KeyCode.BackQuote)) {
+				Transform rooms = GameObject.Find("Canvas/DebugMapScreen/WindowRoot").transform;
+				JArray envs = (JArray)currentSession.DataStorage["seen_envs"];
+				List<string> hasCars = new List<string>();
+				foreach (APItem item in APShared.items) {
+					if (itemState[(ItemIds)item.id] > 0) hasCars.Add(item.env);
+				}
+				MelonLogger.Msg("{0}", envs);
+				for (int i = 0; i < rooms.childCount; i++) {
+					GameObject room = rooms.GetChild(i).gameObject;
+					ChangeEnvironmentButton ceb = room.GetComponent<ChangeEnvironmentButton>();
+					if (ceb == null) {
+						room.SetActive(false);
+						continue;
+					}
+					FieldInfo fi = ceb.GetType().GetField("Destination", BindingFlags.NonPublic | BindingFlags.Instance);
+					string dest = (string)fi.GetValue(ceb);
+					bool hasString = hasCars.Contains(dest);
+					foreach (string env in envs) {
+						if (env == dest) hasString = true;
+					}
+					room.SetActive(hasString);
+				}
+				EventManager.TriggerEvent("ToggleMap", null);
+			}
+		}
 		
 		[HarmonyPatch(typeof(TitleScreen), "OnClickNewGame")]
 		private static class NewGamePatch {
@@ -70,8 +129,8 @@ namespace tmosthap {
 		public static void ConnectToArchipelago(bool newServer) {
 			if (newServer) {
 				lastItem = -1;
-				foreach (long id in APShared.itemIDs) {
-					itemState[(ItemIds)id] = 0;
+				foreach (APItem item in APShared.items) {
+					itemState[(ItemIds)item.id] = 0;
 				}
 				if (currentSession != null) {
 					currentSession.Items.ItemReceived -= HandleItem;
@@ -114,6 +173,8 @@ namespace tmosthap {
 				}
 				lastItem = i;
 				while (currentSession.Items.Any()) currentSession.Items.DequeueItem();
+
+				currentSession.DataStorage["seen_envs"].Initialize(new JArray());
 			} else {
 				MelonLogger.Error("Error while connecting to Archipelago");
 				messages.Enqueue("Error while connecting to Archipelago");
@@ -153,10 +214,10 @@ namespace tmosthap {
 			if (StoryManager.Instance.story.variablesState["Inventory"] == null) return;
 			InkList inventory = (InkList)StoryManager.Instance.story.variablesState["Inventory"];
 			inventory.Clear();
-			for (int i = 0; i < APShared.itemIDs.Length; i++) {
-				if (APShared.invIDs[i] == "") continue;
-				if (!itemState.ContainsKey((ItemIds)APShared.itemIDs[i])) continue;
-				if (itemState[(ItemIds)APShared.itemIDs[i]] > 0) inventory.AddItem(APShared.invIDs[i]);
+			foreach (APItem item in APShared.items) {
+				if (item.inventory == "") continue;
+				if (!itemState.ContainsKey((ItemIds)item.id)) continue;
+				if (itemState[(ItemIds)item.id] > 0) inventory.AddItem(item.inventory);
 			}
 		}
 		

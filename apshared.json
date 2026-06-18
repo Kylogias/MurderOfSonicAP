@@ -18,9 +18,18 @@
 		{"name": "Broken Robot Arm", "itemtype": "progression", "inventory": "brokenrobotarm"},
 		{"name": "Amy's Hammer", "itemtype": "progression", "inventory": "amyshammer"},
 		{"name": "Menu", "itemtype": "progression", "inventory": "menu"},
-		{"name": "Chili Dog", "itemtype": "filler", "inventory": ""},
-		{"name": "Ramen", "itemtype": "filler", "inventory": ""},
-		{"name": "Chicken Cordon Bleu", "itemtype": "filler", "inventory": ""}
+
+		{"name": "Dining Car", "itemtype": "car", "env": "Prologue"},
+		{"name": "Dining Closet", "itemtype": "car", "env": "DiningCloset"},
+		{"name": "Saloon", "itemtype": "car", "env": "Saloon"},
+		{"name": "Library", "itemtype": "car", "env": "Library"},
+		{"name": "Casino", "itemtype": "car", "env": "Casino"},
+		{"name": "Lounge", "itemtype": "car", "env": "Lounge"},
+		{"name": "Conductor's Car", "itemtype": "car", "env": "Conductor_Car"},
+		
+		{"name": "Chili Dog", "itemtype": "filler"},
+		{"name": "Ramen", "itemtype": "filler"},
+		{"name": "Chicken Cordon Bleu", "itemtype": "filler"}
 	],
 	"rooms": [
 		{"name": "Dining Car", "type": "car", "env": "Environments/Prologue", "entrances": {"Menu": []}, "checks": [
@@ -138,7 +147,7 @@
 			{"name": "Runner #2", "sanity": "run", "index": 28},
 			{"name": "Runner #3", "sanity": "run", "index": 33}
 		]},
-		{"name": "Lockdown", "type": "car", "env": "Environments/LockdownDiningCar", "entrances": {"Conductor's Car Interrogation": []}, "checks": [
+		{"name": "Lockdown", "type": "car_noitem", "env": "Environments/LockdownDiningCar", "entrances": {"Conductor's Car Interrogation": []}, "checks": [
 			{"name": "Window", "sanity": "obj", "object": "Window"},
 			{"name": "Napkin Holder", "sanity": "obj", "object": "Napkin Holder"},
 			{"name": "Robot Arm", "sanity": "obj", "object": "Robot Arm"},
@@ -147,7 +156,7 @@
 			{"name": "Lockdown Door", "sanity": "obj", "object": "Lockdown Door"},
 			{"name": "Sonic", "sanity": "obj", "object": "Sonic"}
 		]},
-		{"name": "Final Push", "type": "car", "env": "Environments/Final_Push", "entrances": {"Lockdown": []}, "checks": [
+		{"name": "Final Push", "type": "car_noitem", "env": "Environments/Final_Push", "entrances": {"Lockdown": []}, "checks": [
 			{"name": "Runner #1", "sanity": "run", "index": 18},
 			{"name": "Runner #2", "sanity": "run", "index": 20},
 			{"name": "Runner #3", "sanity": "run", "index": 29},

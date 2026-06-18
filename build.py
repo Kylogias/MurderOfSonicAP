@@ -16,13 +16,14 @@ COMMANDBASE = [
 	f"-out:mod/Mods/{MODNAME}",
 	f"-reference:{SPARKDIR}/MelonLoader/net35/MelonLoader.dll",
 	f"-reference:{SPARKDIR}/MelonLoader/net35/0Harmony.dll",
-	f"-reference:mod/UserLibs/Archipelago.MultiClient.Net.dll",
-	f"-reference:mod/UserLibs/Newtonsoft.Json.dll"
+	f"-reference:{SPARKDIR}/UserLibs/Archipelago.MultiClient.Net.dll",
+	f"-reference:{SPARKDIR}/UserLibs/Newtonsoft.Json.dll"
 ]
 
 INCLUDE_MANAGED = [
 	"Assembly-CSharp.dll", "UnityEngine.dll", "UnityEngine.CoreModule.dll", "netstandard",
-	"Unity.TextMeshPro.dll", "UnityEngine.UI.dll", "Ink-Libraries.dll"
+	"Unity.TextMeshPro.dll", "UnityEngine.UI.dll", "Ink-Libraries.dll",
+	"UnityEngine.InputLegacyModule"
 ]
 
 ITEM_BASE = 2324655000
@@ -36,6 +37,10 @@ item_name_to_id = {}
 for item in shared["items"]:
 	curID += 1
 	item["id"] = curID
+	if not "inventory" in item:
+		item["inventory"] = ""
+	if not "env" in item:
+		item["env"] = ""
 	item_name_to_id[item["name"]] = curID
 
 curID = LOCATION_BASE
@@ -66,7 +71,7 @@ for sanity in sanity_priority:
 		
 
 with open("world/apshared.py", "w") as appy:
-	appy.write("from BaseClasses import ItemClassification\n")
+	appy.write("from .items import ItemType\n")
 	appy.write("apshared = ")
 	shared_str = json.dumps(shared)
 	index = shared_str.find("itemtype")
@@ -74,7 +79,7 @@ with open("world/apshared.py", "w") as appy:
 		index = shared_str.find("itemtype")
 		if index == -1: break
 		part = shared_str.partition('"itemtype": "')
-		shared_str = "".join([part[0], '"type": ItemClassification.'])
+		shared_str = "".join([part[0], '"type": ItemType.'])
 		part = part[2].partition('"')
 		shared_str = "".join([shared_str, part[0], part[2]])
 	appy.write(shared_str)
@@ -91,20 +96,14 @@ with open("client/apshared.cs", "w") as apcs:
 	apcs.write("}\n")
 	apcs.write("\tclass APShared {\n")
 	apcs.write(f"\t\tpublic static int version = {shared['version']};\n")
-	apcs.write(f"\t\tpublic static long[] itemIDs = ")
-	apcs.write("{")
+	apcs.write(f"\t\tpublic static APItem[] items = ")
+	apcs.write("{\n")
 	for item in shared["items"]:
-		apcs.write(f"{item['id']}")
+		apcs.write(f"\t\t\tnew APItem({item['id']}, \"{item['inventory']}\", \"{item['env']}\")")
 		if item != shared["items"][-1]:
-			apcs.write(", ")
-	apcs.write("};\n")
-	apcs.write(f"\t\tpublic static string[] invIDs = ")
-	apcs.write("{")
-	for item in shared["items"]:
-		apcs.write(f"\"{item['inventory']}\"")
-		if item != shared["items"][-1]:
-			apcs.write(", ")
-	apcs.write("};\n")
+			apcs.write(",")
+		apcs.write("\n");
+	apcs.write("\t\t};\n")
 	apcs.write(f"\t\tpublic static APRoom[] rooms = ")
 	apcs.write("{\n")
 	for room in shared["rooms"]:

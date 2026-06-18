@@ -13,12 +13,13 @@ class LocationState:
 
 	def setup_regions(self, world):
 		all_regions = []
-		world.multiworld.regions.append(Region("Menu", world.player, world.multiworld))
+		menu_region = Region("Menu", world.player, world.multiworld)
+		world.multiworld.regions.append(menu_region)
 		for room in apshared["rooms"]:
 			region = Region(room["name"], world.player, world.multiworld)
 			world.multiworld.regions += [region]
 			all_regions.append(region)
-			if room["type"] == "car":
+			if room["type"] == "car" or room["type"] == "car_noitem":
 				self.car_regions.append(region)
 			rule = True_()
 			for check in room["checks"]:
@@ -31,11 +32,15 @@ class LocationState:
 		for i in range(len(all_regions)):
 			region = all_regions[i]
 			room = apshared["rooms"][i]
-			for entrance in room["entrances"].keys():
-				from_region = world.get_region(entrance)
-				rule = True_()
-				for item in room["entrances"][entrance]:
-					rule = rule & Has(item)
-				from_region.connect(region, f"{entrance} to {room['name']}")
-				world.set_rule(world.get_entrance(f"{entrance} to {room['name']}"), rule)
+			if room["type"] == "car" and world.car_rando:
+				menu_region.connect(region, f"Menu to {room['name']}")
+				world.set_rule(world.get_entrance(f"Menu to {room['name']}"), Has(room['name']))
+			else:
+				for entrance in room["entrances"].keys():
+					from_region = world.get_region(entrance)
+					rule = True_()
+					for item in room["entrances"][entrance]:
+						rule = rule & Has(item)
+					from_region.connect(region, f"{entrance} to {room['name']}")
+					world.set_rule(world.get_entrance(f"{entrance} to {room['name']}"), rule)
 		world.set_completion_rule(Has("Retirement"))
