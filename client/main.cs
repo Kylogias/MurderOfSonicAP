@@ -6,10 +6,13 @@ using Archipelago.MultiClient.Net;
 using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
 using Archipelago.MultiClient.Net.MessageLog.Messages;
+using Archipelago.MultiClient.Net.MessageLog.Parts;
 using Archipelago.MultiClient.Net.Helpers;
 using Archipelago.MultiClient.Net.Models;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Linq;
+using System.Text;
 using Ink.Runtime;
 using Newtonsoft.Json.Linq;
 
@@ -35,6 +38,12 @@ namespace tmosthap {
 		public static DeathLinkService deathLink;
 		static Dictionary<string, object> slotDataDict;
 		static Dictionary<ItemIds, int> itemState;
+
+		class DisplayedMessage {
+			public GameObject go;
+			public float timeLeft;
+		}
+		private static DisplayedMessage[] messageText;
 		static Queue<string> messages;
 
 		static GameObject inventoryListener;
@@ -53,6 +62,10 @@ namespace tmosthap {
 			new SlotData();
 			messages = new Queue<string>();
 			itemState = new Dictionary<ItemIds, int>();
+			messageText = new DisplayedMessage[5];
+			for (int i = 0; i < messageText.Length; i++) {
+				messageText[i] = new DisplayedMessage();
+			}
 		}
 		
 		public override void OnSceneWasInitialized(int buildIndex, string sceneName) {
@@ -68,6 +81,28 @@ namespace tmosthap {
 			inventoryListener = new GameObject("Inventory Listener", typeof(OnInventoryChange));
 			inventoryListener.transform.SetParent(ap.transform);
 			inventoryListener.SetActive(false);
+			GameObject canvasGO = new GameObject("APCanvas", typeof(Canvas), typeof(CanvasScaler));
+			canvasGO.transform.SetParent(ap.transform);
+			Canvas canvas = canvasGO.GetComponent<Canvas>();
+			canvas.sortingOrder = 10;
+			canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+			for (int i = 0; i < messageText.Count(); i++) {
+				GameObject textGO = new GameObject(string.Format("APText {0}", i), typeof(Text));
+				messageText[i].go = textGO;
+				messageText[i].timeLeft = 0;
+				textGO.SetActive(false);
+				textGO.transform.SetParent(canvasGO.transform);
+				Text text = textGO.GetComponent<Text>();
+				text.GetType().GetMethod("AssignDefaultFont", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(text, new object[]{});
+				text.text = "chat looks a bit dead";
+				text.alignment = TextAnchor.MiddleCenter;
+				text.resizeTextForBestFit = true;
+				text.fontSize = 1000;
+				text.supportRichText = true;
+				RectTransform textRect = textGO.GetComponent<RectTransform>();
+				textRect.localPosition = new Vector3(0, -((Screen.height/2)-(Screen.height/16)), 0);
+				textRect.sizeDelta = new Vector2(Screen.width, Screen.height/8);
+			}
 		}
 
 		static bool envButton = false;
@@ -129,18 +164,57 @@ namespace tmosthap {
 			}
 			return false;
 		}
-
-		static float throttle;
+		
 		public override void OnUpdate() {
 			if (currentSession == null) return;
-			throttle -= Time.deltaTime;
-			if (throttle < 0) {
-				throttle = 0;
-				if (isQOLEnabled(autoskip.Value)) {
-					DialogView dv = DialogView.Instance;
-					if (dv.gameObject.activeSelf && StoryManager.Instance.story.currentChoices.Count == 0) {
-						dv.GetType().GetMethod("OnClickContinue", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(dv, new object[]{});
+
+			foreach (DisplayedMessage dm in messageText) {
+				dm.timeLeft -= Time.unscaledDeltaTime;
+				if (dm.go) {
+					if (dm.timeLeft < 0) dm.go.SetActive(false);
+					else dm.go.SetActive(true);
+				}
+			}
+			if (messages.Count() > 0 && messageText[0].go != null) {
+				int index = -1;
+				bool found = false;
+				for (index = 0; index < messageText.Count(); index++) {
+					if (!messageText[index].go.activeSelf) {
+						found = true;
+						break;
 					}
+				}
+				if (!found) {
+					float maxY = -100000;
+					index = -1;
+					for (int i = 0; i < messageText.Count(); i++) {
+						RectTransform xfrm = messageText[i].go.GetComponent<RectTransform>();
+						if (xfrm.localPosition.y > maxY) {
+							maxY = xfrm.localPosition.y;
+							index = i;
+						}
+					}
+					messageText[index].timeLeft = -1;
+				} else {
+					RectTransform textRect = messageText[index].go.GetComponent<RectTransform>();
+					textRect.localPosition = new Vector3(0, -((Screen.height/2)-(Screen.height/16)), 0);
+					textRect.sizeDelta = new Vector2(Screen.width, Screen.height/8);
+					for (int i = 0; i < messageText.Count(); i++) {
+						if (!messageText[i].go.activeSelf) continue;
+						RectTransform moveup = messageText[i].go.GetComponent<RectTransform>();
+						moveup.localPosition = new Vector3(0, moveup.localPosition.y + moveup.sizeDelta.y/2, 0);
+					}
+
+					messageText[index].timeLeft = 5;
+					Text text = messageText[index].go.GetComponent<Text>();
+					text.text = messages.Dequeue();
+				}
+			}
+			
+			if (isQOLEnabled(autoskip.Value)) {
+				DialogView dv = DialogView.Instance;
+				if (dv.gameObject.activeSelf && StoryManager.Instance.story.currentChoices.Count == 0) {
+					dv.GetType().GetMethod("OnClickContinue", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(dv, new object[]{});
 				}
 			}
 			if (Input.GetKeyDown(KeyCode.BackQuote)) {
@@ -217,7 +291,7 @@ namespace tmosthap {
 				deathLink = DeathLinkProvider.CreateDeathLinkService(currentSession);
 				deathLink.OnDeathLinkReceived += HandleDeathLink;
 				if (deathlinkEnabled.Value) deathLink.EnableDeathLink();
-				messages.Enqueue("Successful Connection to Spark 3! You may now collect checks");
+				messages.Enqueue("Successful Connection to TMOSTH! You may now collect checks");
 				int i = 0;
 				foreach (ItemInfo item in currentSession.Items.AllItemsReceived) {
 					onItem(item, true);
@@ -240,7 +314,14 @@ namespace tmosthap {
 		}
 
 		public static void OnMessageReceived(LogMessage message) {
-			
+			StringBuilder sb = new StringBuilder("", 65536);
+			MelonLogger.Msg("Message Part Count: {0}", message.Parts.Count());
+			foreach (MessagePart part in message.Parts) {
+				if (!part.IsBackgroundColor) sb.AppendFormat("<color=#{0:X2}{1:X2}{2:X2}>", part.Color.R, part.Color.G, part.Color.B);
+				sb.Append(part.Text);
+				if (!part.IsBackgroundColor) sb.Append("</color>");
+			}
+			messages.Enqueue(sb.ToString());
 		}
 
 		[HarmonyPatch(typeof(InventoryListener), "Evaluate")]

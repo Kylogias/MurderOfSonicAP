@@ -22,8 +22,8 @@ COMMANDBASE = [
 
 INCLUDE_MANAGED = [
 	"Assembly-CSharp.dll", "UnityEngine.dll", "UnityEngine.CoreModule.dll", "netstandard",
-	"Unity.TextMeshPro.dll", "UnityEngine.UI.dll", "Ink-Libraries.dll",
-	"UnityEngine.InputLegacyModule"
+	"Unity.TextMeshPro.dll", "UnityEngine.UI.dll", "Ink-Libraries.dll", "UnityEngine.UIModule.dll",
+	"UnityEngine.InputLegacyModule", "UnityEngine.TextRenderingModule.dll"
 ]
 
 ITEM_BASE = 2324655000
