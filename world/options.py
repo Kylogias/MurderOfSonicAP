@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from Options import PerGameCommonOptions, Toggle
+from Options import PerGameCommonOptions, Toggle, Choice
 
 class CarRando(Toggle):
 	"""
@@ -11,17 +11,33 @@ class CarRando(Toggle):
 	"""
 	display_name = "Car Rando"
 
-class DialogSanity(Toggle):
+class DialogSanity(Choice):
 	"""
-	Should the 142 choices in dialogs be checks? You may be required to restart the game multiple times
+	Should the 76 choices in dialogs be checks
+	Optionally including the 64 missable choices
+	- Will require you to load a save or new game
 	"""
 	display_name = "Choice Sanity"
 
-class DeductionSanity(Toggle):
+	option_off = 0
+	option_on = 1
+	option_include_missable = 2
+
+	default = option_off
+
+class DeductionSanity(Choice):
 	"""
-	Should the 85 correct/incorrect deductions be checks. Note that this does not override deathlink if enabled
+	Should the 31 correct deductions be checks. 
+	Optionally including the 54 incorrect deductions.
+	- Note that this does not override deathlink if enabled
 	"""
 	display_name = "Deduction Sanity"
+	
+	option_off = 0
+	option_on = 1
+	option_include_incorrect = 2
+
+	default = option_off
 
 @dataclass
 class TMOSTHOptions(PerGameCommonOptions):

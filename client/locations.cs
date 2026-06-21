@@ -42,8 +42,7 @@ namespace tmosthap {
 		private class DialogPatch {
 			private static void Prefix(DialogView __instance, Choice choice) {
 				MelonLogger.Msg("Sending check for Dialog {0}", choice.pathStringOnChoice);
-				sendDialogLocation("dialog", choice.pathStringOnChoice);
-				if (sendDialogLocation("deduct", choice.pathStringOnChoice)) {
+				if (sendDialogLocation(new string[]{"dialog", "missable", "deduct", "incorrect"}, choice.pathStringOnChoice)) {
 					ModMain.sendDeathLink("failed to deduce properly");
 				}
 			}
@@ -53,7 +52,7 @@ namespace tmosthap {
 		private class TooManyChoicesPatch {
 			private static void Prefix(Choice choice) {
 				MelonLogger.Msg("Sending check for Dialog {0}", choice.pathStringOnChoice);
-				if (sendDialogLocation("deduct", choice.pathStringOnChoice)) {
+				if (sendDialogLocation(new string[]{"deduct", "incorrect"}, choice.pathStringOnChoice)) {
 					ModMain.sendDeathLink("is too panicked about the ticking");
 				}
 			}
@@ -67,7 +66,7 @@ namespace tmosthap {
 					action = (() => {
 						var selectedItem = (InventoryItemThumbnailView)__instance.GetType().GetField("selectedItem", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(__instance);
 						MelonLogger.Msg("Sending Check for Inventory {0} (if correct)", StoryManager.Instance.story.state.currentPathString);
-						if (sendDialogLocation("deduct", StoryManager.Instance.story.state.currentPathString, selectedItem.ItemKey)) {
+						if (sendDialogLocation(new string[]{"deduct", "incorrect"}, StoryManager.Instance.story.state.currentPathString, selectedItem.ItemKey)) {
 							ModMain.sendDeathLink("couldn't find the correct item");
 						}
 						temp();
@@ -81,7 +80,7 @@ namespace tmosthap {
 			private static void Prefix(Transform itemTransform) {
 				int idx = itemTransform.GetSiblingIndex();
 				MelonLogger.Msg("Sending Check for Library Map {0}", idx);
-				if (sendLocation("deduct", idx)) {
+				if (sendLocation(new string[]{"deduct", "incorrect"}, idx)) {
 					ModMain.sendDeathLink("couldn't find Espio's reading nook");
 				}
 			}
@@ -92,7 +91,7 @@ namespace tmosthap {
 			private static void Prefix(Transform itemTransform) {
 				int idx = itemTransform.GetSiblingIndex();
 				MelonLogger.Msg("Sending Check for Arcade Screen {0}", idx);
-				if (sendLocation("deduct", idx)) {
+				if (sendLocation(new string[]{"deduct", "incorrect"}, idx)) {
 					ModMain.sendDeathLink("couldn't read Tails' mind");
 				}
 			}
@@ -103,7 +102,7 @@ namespace tmosthap {
 			private static void Prefix(Transform itemTransform) {
 				int idx = itemTransform.GetSiblingIndex();
 				MelonLogger.Msg("Sending Check for Who Dunnit {0}", idx);
-				if (sendLocation("deduct", idx)) {
+				if (sendLocation(new string[]{"deduct", "incorrect"}, idx)) {
 					ModMain.sendDeathLink("was not the Imposter. 1 imposter remains");
 				}
 			}
@@ -126,6 +125,26 @@ namespace tmosthap {
 			return false;
 		}
 
+		public static bool sendLocation(string[] sanities, string obj) {
+			string env = GameObject.Find("Canvas/EnvironmentFrame").GetComponent<EnvironmentView>().GetEnvironmentKey();
+			foreach (APRoom room in APShared.rooms) {
+				if (room.env == env) {
+					foreach (APRoomCheck check in room.checks) {
+						if (sanities.Contains(check.sanity) && check.obj == obj) {
+							ModMain.currentSession.Locations.CompleteLocationChecksAsync(null, check.id);
+							if (check.death == "true") return true;
+							return false;
+						}
+					}
+				}
+			}
+			MelonLogger.Msg("Unable to find check!\n\tenvironment {0}\n\tobject {1}", env, obj);
+			foreach (string sanity in sanities) {
+				MelonLogger.Msg("\tsanity {0}", sanity);
+			}
+			return false;
+		}
+
 		public static bool sendDialogLocation(string sanity, string dialog, string item = null) {
 			string env = GameObject.Find("Canvas/EnvironmentFrame").GetComponent<EnvironmentView>().GetEnvironmentKey();
 			foreach (APRoom room in APShared.rooms) {
@@ -145,6 +164,29 @@ namespace tmosthap {
 			MelonLogger.Msg("Unable to find check!\n\tenvironment {2}\n\tsanity {0}\n\tdialog {1}", sanity, dialog, env);
 			return false;
 		}
+
+		public static bool sendDialogLocation(string[] sanities, string dialog, string item = null) {
+			string env = GameObject.Find("Canvas/EnvironmentFrame").GetComponent<EnvironmentView>().GetEnvironmentKey();
+			foreach (APRoom room in APShared.rooms) {
+				if (room.env == env) {
+					foreach (APRoomCheck check in room.checks) {
+						if (sanities.Contains(check.sanity) && check.dialog.Contains(dialog)) {
+							if (item == null || item == check.death) {
+								ModMain.currentSession.Locations.CompleteLocationChecksAsync(null, check.id);
+								if (check.death == "true") return true;
+								return false;
+							}
+							return true;
+						}
+					}
+				}
+			}
+			MelonLogger.Msg("Unable to find check!\n\tenvironment {0}\n\tdialog {1}", env, dialog);
+			foreach (string sanity in sanities) {
+				MelonLogger.Msg("\tsanity {0}", sanity);
+			}
+			return false;
+		}
 		
 		public static bool sendLocation(string sanity, int index) {
 			string env = ModMain.getEnvironment();
@@ -160,6 +202,26 @@ namespace tmosthap {
 				}
 			}
 			MelonLogger.Msg("Unable to find check!\n\tenvironment {2}\n\tsanity {0}\n\tindex {1}", sanity, index, env);
+			return false;
+		}
+
+		public static bool sendLocation(string[] sanities, int index) {
+			string env = GameObject.Find("Canvas/EnvironmentFrame").GetComponent<EnvironmentView>().GetEnvironmentKey();
+			foreach (APRoom room in APShared.rooms) {
+				if (room.env == env) {
+					foreach (APRoomCheck check in room.checks) {
+						if (sanities.Contains(check.sanity) && check.index == index) {
+							ModMain.currentSession.Locations.CompleteLocationChecksAsync(null, check.id);
+							if (check.death == "true") return true;
+							return false;
+						}
+					}
+				}
+			}
+			MelonLogger.Msg("Unable to find check!\n\tenvironment {0}\n\tindex {1}", env, index);
+			foreach (string sanity in sanities) {
+				MelonLogger.Msg("\tsanity {0}", sanity);
+			}
 			return false;
 		}
 	}

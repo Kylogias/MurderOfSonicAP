@@ -45,7 +45,7 @@ for item in shared["items"]:
 
 curID = LOCATION_BASE
 location_name_to_id = {}
-sanity_priority = ["obj", "scr", "run", "dialog", "deduct"]
+sanity_priority = ["obj", "scr", "run", "dialog", "deduct", "missable", "incorrect"]
 sanities = {}
 for sanity in sanity_priority:
 	sanities[sanity] = []

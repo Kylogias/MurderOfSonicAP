@@ -29,8 +29,12 @@ class TMOSTHWorld(World):
 		
 		if self.options.choice_sanity:
 			self.location_state.sanities.append("dialog")
+		if self.options.choice_sanity.value == 2:
+			self.location_state.sanities.append("missable")
 		if self.options.deduction_sanity:
 			self.location_state.sanities.append("deduct")
+		if self.options.deduction_sanity.value == 2:
+			self.location_state.sanities.append("incorrect")
 		
 		re_gen_passthrough = getattr(self.multiworld, "re_gen_passthrough", {})
 		if re_gen_passthrough and self.game in re_gen_passthrough:
