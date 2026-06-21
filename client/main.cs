@@ -49,6 +49,8 @@ namespace tmosthap {
 		static GameObject inventoryListener;
 
 		static int lastItem;
+		static bool invDirty;
+		static bool deathlinkPending;
 		
 		public override void OnInitializeMelon() {
 			MelonPreferences.CreateCategory("Archipelago");
@@ -113,6 +115,9 @@ namespace tmosthap {
 			invLayout.anchoredPosition = invLayout.anchoredPosition * new Vector2(1.5f, 1);
 			RectTransform itemDetails = (RectTransform)invWndXfrm.Find("ItemDetails");
 			itemDetails.anchoredPosition = itemDetails.anchoredPosition * new Vector2(1.5f, 1);
+
+			EventManager.StartListening("MinigameFinished", playerDiedListener);
+			EventManager.StartListening("RunnerPlayerDied", playerDiedListener);
 		}
 		
 		[HarmonyPatch(typeof(InventoryScreen), "Open")]
@@ -155,7 +160,6 @@ namespace tmosthap {
 				if (SlotData.carRando && !envButton) return false;
 				envButton = false;
 				JArray seen_envs = (JArray)currentSession.DataStorage["seen_envs"];
-				MelonLogger.Msg("{0}", seen_envs);
 				bool seenEnv = false;
 				foreach (string env in seen_envs) {
 					if (env == (string)message["DestinationKey"]) seenEnv = true;
@@ -188,6 +192,17 @@ namespace tmosthap {
 		public override void OnUpdate() {
 			if (currentSession == null) return;
 
+			if (invDirty) {if (rebuildInventory()) invDirty = false; else if (messages.Count() == 0) messages.Enqueue("<color=#FF0000>Unable to Rebuild Inventory! Quit to Menu and Reconnect!</color>");}
+			if (deathlinkPending) {
+				if (RunnerGameManager.Instance.gameObject.activeSelf) {
+					isDeathLink = true;
+					RunnerGameManager.Instance.OnLose();
+				} else if (DialogView.Instance.gameObject.activeSelf) {
+					GameManager.Instance.EndConversation();
+				}
+				deathlinkPending = false;
+			}
+			
 			foreach (DisplayedMessage dm in messageText) {
 				dm.timeLeft -= Time.unscaledDeltaTime;
 				if (dm.go) {
@@ -227,7 +242,7 @@ namespace tmosthap {
 
 					messageText[index].timeLeft = 5;
 					Text text = messageText[index].go.GetComponent<Text>();
-					text.text = messages.Dequeue();
+					text.text = string.Format("<b>{0}</b>", messages.Dequeue());
 				}
 			}
 			
@@ -273,6 +288,14 @@ namespace tmosthap {
 				inventoryListener.SetActive(true);
 			}
 		}
+
+		[HarmonyPatch(typeof(TitleScreen), "OnLoadingSave")]
+		private static class ContinuePatch {
+			private static void Prefix() {
+				ConnectToArchipelago(true);
+				inventoryListener.SetActive(true);
+			}
+		}
 		
 		public static void ConnectToArchipelago(bool newServer) {
 			if (newServer) {
@@ -291,9 +314,7 @@ namespace tmosthap {
 			}
 			
 			currentSession = ArchipelagoSessionFactory.CreateSession(ip.Value, port.Value);
-			LoginResult result;
-			if (password.Value.Length != 0) result = currentSession.TryConnectAndLogin("The Murder of Sonic the Hedgehog", slot.Value, ItemsHandlingFlags.AllItems, password: password.Value);
-			else result = currentSession.TryConnectAndLogin("The Murder of Sonic the Hedgehog", slot.Value, ItemsHandlingFlags.AllItems);
+			LoginResult result = currentSession.TryConnectAndLogin("The Murder of Sonic the Hedgehog", slot.Value, ItemsHandlingFlags.AllItems, password: password.Value);
 			
 			if (result.Successful) {
 				slotDataDict = ((LoginSuccessful)result).SlotData;
@@ -363,18 +384,20 @@ namespace tmosthap {
 			}
 		}
 		
-		private static void rebuildInventory() {
-			if (!StoryManager.Instance) return;
-			if (!StoryManager.Instance.story) return;
-			if (StoryManager.Instance.story.variablesState == null) return;
-			if (StoryManager.Instance.story.variablesState["Inventory"] == null) return;
+		private static bool rebuildInventory() {
+			if (!StoryManager.Instance) return false;
+			if (!StoryManager.Instance.story) return false;
+			if (StoryManager.Instance.story.variablesState == null) return false;
+			if (StoryManager.Instance.story.variablesState["Inventory"] == null) return false;
 			InkList inventory = (InkList)StoryManager.Instance.story.variablesState["Inventory"];
+			if (inventory.origins == null) return false;
 			inventory.Clear();
 			foreach (APItem item in APShared.items) {
 				if (item.inventory == "") continue;
 				if (!itemState.ContainsKey((ItemIds)item.id)) continue;
 				if (itemState[(ItemIds)item.id] > 0) inventory.AddItem(item.inventory);
 			}
+			return true;
 		}
 		
 		public static void HandleItem(ReceivedItemsHelper itemHandler) {
@@ -390,14 +413,12 @@ namespace tmosthap {
 		private static void onItem(ItemInfo item, bool catchup)  {
 			MelonLogger.Msg("Receiving {0} with ID {1}", item.ItemDisplayName, item.ItemId);
 			itemState[(ItemIds)item.ItemId] += 1;
-			rebuildInventory();
+			invDirty = true;
 		}
-
-		[HarmonyPatch(typeof(RunnerGameManager), "OnLose")]
-		private class RunnerLosePatch {
-			private static void Prefix() {
-				sendDeathLink("was unable to THINK!");
-			}
+		
+		private static void playerDiedListener(Dictionary<string, object> message) {
+			if (message != null && message.ContainsKey("PlayerWon") && (bool)message["PlayerWon"]) return;
+			sendDeathLink("was unable to THINK!");
 		}
 		
 		public static bool isDeathLink = false;
@@ -416,13 +437,7 @@ namespace tmosthap {
 			else sb.Append(deathLink.Source);
 			sb.Append("</color>");
 			messages.Enqueue(sb.ToString());
-			
-			if (RunnerGameManager.Instance.gameObject.activeSelf) {
-				isDeathLink = true;
-				RunnerGameManager.Instance.OnLose();
-			} else if (DialogView.Instance.gameObject.activeSelf) {
-				DialogView.Instance.Close();
-			}
+			deathlinkPending = true;
 		}
 	}
 }

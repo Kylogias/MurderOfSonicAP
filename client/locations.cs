@@ -53,7 +53,7 @@ namespace tmosthap {
 		private class TooManyChoicesPatch {
 			private static void Prefix(Choice choice) {
 				MelonLogger.Msg("Sending check for Dialog {0}", choice.pathStringOnChoice);
-				if (sendDialogLocation("dialog", choice.pathStringOnChoice)) {
+				if (sendDialogLocation("deduct", choice.pathStringOnChoice)) {
 					ModMain.sendDeathLink("is too panicked about the ticking");
 				}
 			}
@@ -67,7 +67,7 @@ namespace tmosthap {
 					action = (() => {
 						var selectedItem = (InventoryItemThumbnailView)__instance.GetType().GetField("selectedItem", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(__instance);
 						MelonLogger.Msg("Sending Check for Inventory {0} (if correct)", StoryManager.Instance.story.state.currentPathString);
-						if (sendDialogLocation("deduct", selectedItem.ItemKey)) {
+						if (sendDialogLocation("deduct", StoryManager.Instance.story.state.currentPathString, selectedItem.ItemKey)) {
 							ModMain.sendDeathLink("couldn't find the correct item");
 						}
 						temp();

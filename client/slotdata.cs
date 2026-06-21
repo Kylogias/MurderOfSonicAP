@@ -12,6 +12,7 @@ namespace tmosthap {
 
 		public SlotData() {
 			version = -1;
+			carRando = false;
 		}
 	}
 }
