@@ -13,7 +13,7 @@ class CarRando(Toggle):
 
 class DialogSanity(Toggle):
 	"""
-	Should the 144 choices in dialogs be checks? You may be required to restart the game multiple times
+	Should the 142 choices in dialogs be checks? You may be required to restart the game multiple times
 	"""
 	display_name = "Choice Sanity"
 

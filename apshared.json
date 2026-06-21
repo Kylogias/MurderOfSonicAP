@@ -259,8 +259,6 @@
 			{"name": "Game Choice 2", "sanity": "dialog", "dialog": ["Casino.Poker_Table.0.c-1"]},
 			{"name": "Game Tutorial Choice 1", "sanity": "dialog", "dialog": ["Casino.Poker_Table.0.g-0.c-2"]},
 			{"name": "Game Tutorial Choice 2", "sanity": "dialog", "dialog": ["Casino.Poker_Table.0.g-0.c-3"]},
-			{"name": "Game Tutorial Choice 1", "sanity": "dialog", "dialog": ["Casino.Poker_Table.0.g-0.c-2"]},
-			{"name": "Game Tutorial Choice 2", "sanity": "dialog", "dialog": ["Casino.Poker_Table.0.g-0.c-3"]},
 			{"name": "Slots Choice 1", "sanity": "dialog", "dialog": ["Casino.Slot_Machine_Loop.0.c-0"]},
 			{"name": "Slots Choice 2", "sanity": "dialog", "dialog": ["Casino.Slot_Machine_Loop.0.c-1"]},
 			{"name": "Talk To Blaze 1", "sanity": "dialog", "dialog": ["Casino.Environment_Blaze.0.c-0"]},

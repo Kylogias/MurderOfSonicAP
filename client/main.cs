@@ -143,8 +143,8 @@ namespace tmosthap {
 		private class EnvironmentPatch {
 			private static bool Prefix(Dictionary<string, object> message) {
 				if (currentSession == null) return false;
+				string fromEnv = getEnvironment();
 				if (!envButton) {
-					string fromEnv = getEnvironment();
 					JArray complete_envs = (JArray)currentSession.DataStorage["complete_envs"];
 					bool completeEnv = false;
 					foreach (string env in complete_envs) {
@@ -242,6 +242,7 @@ namespace tmosthap {
 				Transform rooms = GameObject.Find("Canvas/DebugMapScreen/WindowRoot").transform;
 				JArray envs = (JArray)currentSession.DataStorage["seen_envs"];
 				List<string> hasCars = new List<string>();
+				if (itemState[ItemIds.CASINO] > 0) hasCars.Add("SafeRoom");
 				foreach (APItem item in APShared.items) {
 					if (itemState[(ItemIds)item.id] > 0) hasCars.Add(item.env);
 				}
