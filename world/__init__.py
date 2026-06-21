@@ -26,11 +26,17 @@ class TMOSTHWorld(World):
 			self.car_rando = True
 		else:
 			self.car_rando = False
-
+		
+		if self.options.choice_sanity:
+			self.location_state.sanities.append("dialog")
+		if self.options.deduction_sanity:
+			self.location_state.sanities.append("deduction")
+		
 		re_gen_passthrough = getattr(self.multiworld, "re_gen_passthrough", {})
 		if re_gen_passthrough and self.game in re_gen_passthrough:
 			slot_data = re_gen_passthrough[self.game]
 			self.car_rando = slot_data["car_rando"]
+			self.location_state.sanities = slot_data["sanities"]
 
 	def create_regions(self):
 		self.location_state.setup_regions(self)
@@ -47,7 +53,8 @@ class TMOSTHWorld(World):
 	def fill_slot_data(self):
 		return {
 			"version": apshared["version"],
-			"car_rando": self.car_rando
+			"car_rando": self.car_rando,
+			"sanities": self.location_state.sanities
 		}
 
 	@staticmethod

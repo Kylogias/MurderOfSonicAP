@@ -11,7 +11,21 @@ class CarRando(Toggle):
 	"""
 	display_name = "Car Rando"
 
+class DialogSanity(Toggle):
+	"""
+	Should the 144 choices in dialogs be checks? You may be required to restart the game multiple times
+	"""
+	display_name = "Choice Sanity"
+
+class DeductionSanity(Toggle):
+	"""
+	Should the 85 correct/incorrect deductions be checks. Note that this does not override deathlink if enabled
+	"""
+	display_name = "Deduction Sanity"
+
 @dataclass
 class TMOSTHOptions(PerGameCommonOptions):
 	car_rando: CarRando
+	choice_sanity: DialogSanity
+	deduction_sanity: DeductionSanity
 

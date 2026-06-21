@@ -45,7 +45,7 @@ for item in shared["items"]:
 
 curID = LOCATION_BASE
 location_name_to_id = {}
-sanity_priority = ["obj", "scr", "run"]
+sanity_priority = ["obj", "scr", "run", "dialog", "deduct"]
 sanities = {}
 for sanity in sanity_priority:
 	sanities[sanity] = []
@@ -55,6 +55,10 @@ for room in shared["rooms"]:
 			check["object"] = ""
 		if not "index" in check:
 			check["index"] = -1
+		if not "death" in check:
+			check["death"] = "false"
+		if not "dialog" in check:
+			check["dialog"] = []
 		if check["sanity"] in sanity_priority:
 			sanities[check["sanity"]].append([room["name"], check])
 		else:
@@ -110,7 +114,13 @@ with open("client/apshared.cs", "w") as apcs:
 		apcs.write(f"\t\t\tnew APRoom(\"{room['env']}\", new APRoomCheck[]")
 		apcs.write("{\n")
 		for check in room["checks"]:
-			apcs.write(f"\t\t\t\tnew APRoomCheck(\"{check['sanity']}\", \"{check['object']}\", {check['index']}, {check['id']})")
+			apcs.write(f"\t\t\t\tnew APRoomCheck(\"{check['sanity']}\", \"{check['object']}\", {check['index']}, {check['id']}, \"{check['death']}\", new string[]")
+			apcs.write("{")
+			for dialog in check["dialog"]:
+				apcs.write(f"\"{dialog}\"")
+				if dialog != check["dialog"][-1]:
+					apcs.write(", ")
+			apcs.write("})")
 			if check != room["checks"][-1]:
 				apcs.write(",")
 			apcs.write("\n")

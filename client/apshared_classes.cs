@@ -15,11 +15,15 @@ namespace tmosthap {
 		public string obj;
 		public int index;
 		public long id;
-		public APRoomCheck(string t, string o, int idx, long i) {
+		public string death;
+		public string[] dialog;
+		public APRoomCheck(string t, string o, int idx, long i, string de, string[] di) {
 			sanity = t;
 			obj = o;
 			index = idx;
 			id = i;
+			death = de;
+			dialog = di;
 		}
 	}
 

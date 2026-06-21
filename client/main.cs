@@ -117,7 +117,7 @@ namespace tmosthap {
 		
 		[HarmonyPatch(typeof(InventoryScreen), "Open")]
 		private class InventoryScreenPatch {
-			private static void Postfix(InventoryScreen __instance, List<InventoryItemThumbnailView> ___currentItems) {
+			private static void Postfix (InventoryScreen __instance, List<InventoryItemThumbnailView> ___currentItems) {
 				for (int i = ___currentItems.Count; i < 16; i++) {
 					MethodInfo mi = __instance.GetType().GetMethod("CreateThumbnail", BindingFlags.NonPublic | BindingFlags.Instance);
 					___currentItems.Add((InventoryItemThumbnailView)mi.Invoke(__instance, new object[]{""}));
@@ -392,8 +392,36 @@ namespace tmosthap {
 			rebuildInventory();
 		}
 
+		[HarmonyPatch(typeof(RunnerGameManager), "OnLose")]
+		private class RunnerLosePatch {
+			private static void Prefix() {
+				sendDeathLink("was unable to THINK!");
+			}
+		}
+		
+		public static bool isDeathLink = false;
+		public static void sendDeathLink(string source) {
+			string cause = string.Format("{0} {1}", slot.Value, source);
+			if (deathLink != null && deathlinkEnabled.Value && !isDeathLink) {
+				deathLink.SendDeathLink(new DeathLink(slot.Value, cause));
+			}
+			isDeathLink = false;
+		}
+
 		public static void HandleDeathLink(DeathLink deathLink) {
+			StringBuilder sb = new StringBuilder("", 65536);
+			sb.Append("<color=#E02010>Death Link: ");
+			if (deathLink.Cause != null) sb.Append(deathLink.Cause);
+			else sb.Append(deathLink.Source);
+			sb.Append("</color>");
+			messages.Enqueue(sb.ToString());
 			
+			if (RunnerGameManager.Instance.gameObject.activeSelf) {
+				isDeathLink = true;
+				RunnerGameManager.Instance.OnLose();
+			} else if (DialogView.Instance.gameObject.activeSelf) {
+				DialogView.Instance.Close();
+			}
 		}
 	}
 }
