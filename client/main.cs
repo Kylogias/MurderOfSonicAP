@@ -148,6 +148,7 @@ namespace tmosthap {
 		private class EnvironmentPatch {
 			private static bool Prefix(Dictionary<string, object> message) {
 				if (currentSession == null) return false;
+				bool canContinue = !SlotData.carRando || envButton;
 				string fromEnv = getEnvironment();
 				if (!envButton) {
 					JArray complete_envs = (JArray)currentSession.DataStorage["complete_envs"];
@@ -157,7 +158,8 @@ namespace tmosthap {
 					}
 					if (!completeEnv) currentSession.DataStorage["complete_envs"] += new[]{fromEnv};
 				}
-				if (SlotData.carRando && !envButton) return false;
+				if (fromEnv == "Environments/Conductor_Car" || fromEnv == "Environments/LockdownDiningCar") canContinue = true;
+				if (!canContinue) return false;
 				envButton = false;
 				JArray seen_envs = (JArray)currentSession.DataStorage["seen_envs"];
 				bool seenEnv = false;
