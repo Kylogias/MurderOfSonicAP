@@ -33,7 +33,6 @@ class ItemState:
 		return TMOSTHItem(item, self.item_class[item], item_name_to_id[item], world.player)
 
 	def get_filler_item(self, world):
-		print(self.filler_items)
 		return world.random.choice(self.filler_items)
 	
 	def setup_items(self, world):
